@@ -1,0 +1,11 @@
+{
+    "manifest_version": 3,
+    "name": "LC File Creator",
+    "description": "Download LC problems for local debugging",
+    "version": "1.0",
+    "permissions": ["activeTab", "scripting", "downloads"],
+    "action": {
+      "default_popup": "popup.html",
+      "default_icon": "lc.png"
+    }
+  }
