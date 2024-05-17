@@ -4,6 +4,9 @@
     "description": "Download LC problems for local debugging",
     "version": "1.0",
     "permissions": ["activeTab", "scripting", "downloads"],
+    "background": {
+        "service_worker": "background.js"
+      },
     "action": {
       "default_popup": "popup.html",
       "default_icon": "lc.png"
