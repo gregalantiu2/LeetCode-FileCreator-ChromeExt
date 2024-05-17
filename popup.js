@@ -16,14 +16,17 @@ document.getElementById('executeButton').addEventListener('click', () => {
   
     // Initialize code content as an empty string
     let codeContent = '';
+    let codeContentScrub = '';
   
     // Loop through each element with class '.example' and concatenate its text content
     elements.forEach(element => {
-      codeContent += element.textContent.replace(/\u00A0/g, ' '); + "\n";
+      codeContent += element.textContent + "\n";
     });
+
+    codeContentScrub = codeContent.replace(/\u00A0/g, ' ');
   
     // Format the content as a .cs file
-    const blob = new Blob([codeContent], { type: 'text/x-csharp' }); // Specify MIME type as 'text/x-csharp'
+    const blob = new Blob([codeContentScrub], { type: 'text/x-csharp' }); // Specify MIME type as 'text/x-csharp'
     const url = URL.createObjectURL(blob);
     const filename = `${tabTitle}.cs`; // Use the tab title as the filename
   
