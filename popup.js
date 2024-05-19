@@ -41,7 +41,7 @@ document.getElementById('executeButton').addEventListener('click', () => {
       return hashmap;
   }
 
-    let scrubbedTitle = tabTitle.replace('- LeetCode','').replace(' ','').trim();
+    let scrubbedTitle = tabTitle.replace(/- LeetCode/g,'').replace(/ /g,'').trim();
 
     var inputoutput = getInputsandOutputs('Output:');
 
