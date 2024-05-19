@@ -58,8 +58,16 @@ document.getElementById('executeButton').addEventListener('click', () => {
 
     elementsArray = [];
     
+    var c = 0;
+    var methodName = 'Test';
     elements.forEach(element => {
+      if(c === 1){
+        var scrubbedName = element.textContent.trimStart().substring(0,element.textContent.indexOf('('));
+        methodName = scrubbedName.trim().replace(/^[^A-Z]*/, "");
+      }
+
       elementsArray.push(element.textContent);
+      c++;
     });
 
     elementsArray.pop();
@@ -85,7 +93,7 @@ document.getElementById('executeButton').addEventListener('click', () => {
       codeContent += '        public void ' + scrubbedTitle + '_Case' + i + '()\n';
       codeContent += '        {\n';
       codeContent += '            Solution solution = new Solution();\n'
-      codeContent += '            Assert.Equal(' + inputoutput[key].replace(/ =/g,':') +', solution.Test(' + key.replace(/ =/g,':') + '));\n';
+      codeContent += '            Assert.Equal(' + inputoutput[key].replace(/ =/g,':') +', solution.' + methodName + '(' + key.replace(/ =/g,':') + '));\n';
       codeContent += '        }\n';
       i++;
     }
