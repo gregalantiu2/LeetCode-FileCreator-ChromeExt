@@ -11,29 +11,44 @@ document.getElementById('executeButton').addEventListener('click', () => {
 
   function scrapeAndDownload(tabTitle) {
 
-    function searchDOMByText(text) {
-      let elements = document.querySelector('strong');
-      let result = [];
-      
-      elements.forEach(element => {
-          if (element.textContent.includes(text)) {
-              result.push(element.nextElementSibling.textContent.trim());
+    function getInputsandOutputs(text) {
+      let examples = document.getElementsByClassName('example')
+      let hashmap = {};
+
+      Array.from(examples).forEach(example => {
+        let parent = example.parentNode;
+        let nextElement = parent.nextElementSibling;
+        
+        while (nextElement) {
+          if (nextElement.tagName.toLowerCase() === 'pre') {
+              let text = nextElement.textContent;
+              let inputMatch = text.match(/Input:\s*(.*)\s*Output:/);
+              let outputMatch = text.match(/Output:\s*(.*)\s*Explanation:/);
+
+              if(inputMatch && outputMatch){
+                let inputStr = inputMatch[1].trim();
+                let outputStr = outputMatch[1].trim();
+
+                hashmap[inputStr] = outputStr;
+              }
+
+              break;
           }
+          nextElement = nextElement.nextElementSibling;
+        }
       });
   
-      return result;
+      return hashmap;
   }
 
     let scrubbedTitle = tabTitle.replace('- LeetCode','').replace(' ','').trim();
 
-    var inputs = searchDOMByText('Input:');
-    var outputs = searchDOMByText('Output:');
+    var inputoutput = getInputsandOutputs('Output:');
 
     // Function executed in the context of the tab
   
     // Example: Scraping the content of the elements with class '.example'
-    const elements = document.querySelectorAll('.view-line');
-    //elements.pop();
+    var elements = document.querySelectorAll('.view-line');
 
     // Initialize code content as an empty string
     let codeContent = '';
@@ -43,31 +58,39 @@ document.getElementById('executeButton').addEventListener('click', () => {
     codeContent += '{\n';
 
     // Loop through each element with class '.example' and concatenate its text content
+    let elementsArray = Array.from(elements);
+    if (elementsArray.length > 0) {
+      let lastElement = elementsArray.pop();
+      lastElement.remove();
+    } 
 
+    elements = document.querySelectorAll('.view-line');
+    
     elements.forEach(element => {
       codeContent += '    ' + element.textContent + "\n";
     });
     codeContent += '    public class ' + scrubbedTitle +'\n'
     codeContent += '    {\n';
 
-    if(inputs.length < 1 || inputs.length != outputs.length)
+    if(Object.keys(inputoutput).length < 1)
     {
       codeContent += '        [Fact]\n';
-      codeContent += '        public void ' + scrubbedTitle + '_Case' + i + '()\n';
+      codeContent += '        public void ' + scrubbedTitle + '_Case1' + '()\n';
       codeContent += '        {\n';
       codeContent += '            Solution solution = new Solution();\n'
       codeContent += '            Assert.Equal(X,solution.Test(x));\n';
       codeContent += '        }\n';
     }
 
-    for (let i = 0; i < inputs.length; i++) {
-      var scrubbedInput = inputs[i].slice(inputs[i].indexOf('=') + 1).trim();
+    let i = 1;
+    for (let key in inputoutput) {
       codeContent += '        [Fact]\n';
       codeContent += '        public void ' + scrubbedTitle + '_Case' + i + '()\n';
       codeContent += '        {\n';
       codeContent += '            Solution solution = new Solution();\n'
-      codeContent += '            Assert.Equal(' + outputs[i] +', solution.Test(' + scrubbedInput + '));\n';
+      codeContent += '            Assert.Equal(' + inputoutput[key] +', solution.Test(' + key.replace(/ =/g,':') + '));\n';
       codeContent += '        }\n';
+      i++;
     }
     
     codeContent += '    }\n';
