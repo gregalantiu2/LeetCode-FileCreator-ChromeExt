@@ -66,10 +66,6 @@ document.getElementById('executeButton').addEventListener('click', () => {
 
     elementsArray.forEach(element => codeContent += '    ' + element + "\n");
 
-    codeContent += '            }\n'; 
-    codeContent += '        }\n';
-    codeContent += '    }\n';
-
     codeContent += '    public class ' + scrubbedTitle +'\n'
     codeContent += '    {\n';
 
