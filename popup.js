@@ -45,11 +45,6 @@ document.getElementById('executeButton').addEventListener('click', () => {
 
     var inputoutput = getInputsandOutputs('Output:');
 
-    // Function executed in the context of the tab
-  
-    // Example: Scraping the content of the elements with class '.example'
-    var elements = document.querySelectorAll('.view-line');
-
     // Initialize code content as an empty string
     let codeContent = '';
     let codeContentScrub = '';
@@ -58,17 +53,23 @@ document.getElementById('executeButton').addEventListener('click', () => {
     codeContent += '{\n';
 
     // Loop through each element with class '.example' and concatenate its text content
-    let elementsArray = Array.from(elements);
-    if (elementsArray.length > 0) {
-      let lastElement = elementsArray.pop();
-      lastElement.remove();
-    } 
+    // Example: Scraping the content of the elements with class '.example'
+    var elements = document.querySelectorAll('.view-line');
 
-    elements = document.querySelectorAll('.view-line');
+    elementsArray = [];
     
     elements.forEach(element => {
-      codeContent += '    ' + element.textContent + "\n";
+      elementsArray.push(element.textContent);
     });
+
+    elementsArray.pop();
+
+    elementsArray.forEach(element => codeContent += '    ' + element + "\n");
+
+    codeContent += '            }\n'; 
+    codeContent += '        }\n';
+    codeContent += '    }\n';
+
     codeContent += '    public class ' + scrubbedTitle +'\n'
     codeContent += '    {\n';
 
@@ -88,7 +89,7 @@ document.getElementById('executeButton').addEventListener('click', () => {
       codeContent += '        public void ' + scrubbedTitle + '_Case' + i + '()\n';
       codeContent += '        {\n';
       codeContent += '            Solution solution = new Solution();\n'
-      codeContent += '            Assert.Equal(' + inputoutput[key] +', solution.Test(' + key.replace(/ =/g,':') + '));\n';
+      codeContent += '            Assert.Equal(' + inputoutput[key].replace(/ =/g,':') +', solution.Test(' + key.replace(/ =/g,':') + '));\n';
       codeContent += '        }\n';
       i++;
     }
