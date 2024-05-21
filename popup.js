@@ -26,8 +26,8 @@ document.getElementById('executeButton').addEventListener('click', () => {
               let outputMatch = text.match(/Output:\s*(.*)\s*Explanation:/);
 
               if(inputMatch && outputMatch){
-                let inputStr = inputMatch[1].trim();
-                let outputStr = outputMatch[1].trim();
+                let inputStr = inputMatch[1].trim() ?? inputMatch[0].trim();
+                let outputStr = outputMatch[1].trim() ?? outputMatch[0].trim();
 
                 hashmap[inputStr] = outputStr;
               }
@@ -62,8 +62,8 @@ document.getElementById('executeButton').addEventListener('click', () => {
     var methodName = 'Test';
     elements.forEach(element => {
       if(c === 1){
-        var scrubbedName = element.textContent.trimStart().substring(0,element.textContent.indexOf('('));
-        methodName = scrubbedName.trim().replace(/^[^A-Z]*/, "");
+        var scrubbedName = element.textContent.trimStart();
+        methodName = scrubbedName.trim().replace(/^[^A-Z]*/, "").split('(')[0];
       }
 
       elementsArray.push(element.textContent);
