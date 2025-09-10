@@ -1,4 +1,11 @@
 document.getElementById('executeButton').addEventListener('click', () => {
+    var useCs = document.getElementById('useCsGenerator') && document.getElementById('useCsGenerator').checked;
+    if (useCs && window.generateCsFromActiveTab) {
+        // Use the new C# generator
+        window.generateCsFromActiveTab();
+        return;
+    }
+
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       chrome.scripting.executeScript({
         target: { tabId: tabs[0].id },
@@ -7,9 +14,9 @@ document.getElementById('executeButton').addEventListener('click', () => {
       });
     });
   });
-  
 
-  function scrapeAndDownload(tabTitle) {
+
+function scrapeAndDownload(tabTitle) {
 
     function getInputsandOutputs(text) {
       let examples = document.getElementsByClassName('example')
@@ -49,6 +56,19 @@ document.getElementById('executeButton').addEventListener('click', () => {
     let codeContent = '';
     let codeContentScrub = '';
 
+    // Extract the LeetCode problem description and insert it as a C# block comment
+    let descText = '';
+    let descEl = document.querySelector('.elfjS[data-track-load="description_content"]') || document.querySelector('.description_content') || document.querySelector('.question-content');
+    if (descEl) {
+      descText = descEl.innerText.trim();
+      // Normalize non-breaking spaces and CRLFs and guard against accidental end-of-comment sequences
+      descText = descText.replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\*\//g, '*\\/');
+    }
+
+    if (descText) {
+      codeContent += '/*\n' + descText + '\n*/\n\n';
+    }
+
     codeContent += 'namespace LeetCode_Practice\n';
     codeContent += '{\n';
 
@@ -87,19 +107,19 @@ document.getElementById('executeButton').addEventListener('click', () => {
       codeContent += '        }\n';
     }
 
-    let i = 1;
-    for (let key in inputoutput) {
-      codeContent += '        [Fact]\n';
-      codeContent += '        public void ' + scrubbedTitle + '_Case' + i + '()\n';
-      codeContent += '        {\n';
+      let i = 1;
+      for (let key in inputoutput) {
+        codeContent += '        [Fact]\n';
+        codeContent += '        public void ' + scrubbedTitle + '_Case' + i + '()\n';
+        codeContent += '        {\n';
       codeContent += '            Solution solution = new Solution();\n'
       codeContent += '            Assert.Equal(' + inputoutput[key].replace(/ =/g,':') +', solution.' + methodName + '(' + key.replace(/ =/g,':') + '));\n';
       codeContent += '        }\n';
       i++;
     }
-    
+
     codeContent += '    }\n';
-    codeContent += '}'
+    codeContent += '}' 
 
     codeContentScrub = codeContent.replace(/\u00A0/g, ' ').replace('public class Solution','public partial class Solution');
   
@@ -111,5 +131,4 @@ document.getElementById('executeButton').addEventListener('click', () => {
     // Send a message to the background script to initiate the download
     chrome.runtime.sendMessage({ action: 'download', url, filename });
   }
-  
-  
+
