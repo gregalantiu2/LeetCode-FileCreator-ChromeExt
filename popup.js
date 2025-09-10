@@ -62,7 +62,33 @@ function scrapeAndDownload(tabTitle) {
     if (descEl) {
       descText = descEl.innerText.trim();
       // Normalize non-breaking spaces and CRLFs and guard against accidental end-of-comment sequences
-      descText = descText.replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\*\//g, '*\\/');
+      descText = descText.replace(/\u00A0/g, ' ').replace(/\r\n/g, '\n').replace(/\r/g, '\n').replace(/\n+$/g, '\n').replace(/\*\//g, '*\\/');
+
+      // Word-wrap long lines to avoid horizontal scrolling in editors (wrap at ~100 chars)
+      function wrapText(t, width) {
+        const paragraphs = t.split(/\n{2,}/g); // preserve paragraph breaks
+        return paragraphs.map(par => {
+          // collapse any internal multiple whitespace to single spaces for wrapping
+          const clean = par.replace(/\s+/g, ' ').trim();
+          if (clean.length === 0) return '';
+          if (clean.length <= width) return clean;
+          const words = clean.split(' ');
+          let lines = [];
+          let cur = '';
+          for (let w of words) {
+            if ((cur + (cur ? ' ' : '') + w).length > width) {
+              if (cur) lines.push(cur);
+              cur = w;
+            } else {
+              cur = cur ? (cur + ' ' + w) : w;
+            }
+          }
+          if (cur) lines.push(cur);
+          return lines.join('\n');
+        }).join('\n\n');
+      }
+
+      descText = wrapText(descText, 100);
     }
 
     if (descText) {
